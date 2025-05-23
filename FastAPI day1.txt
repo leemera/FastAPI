@@ -1,0 +1,81 @@
+1. Poetry를 사용하여 가상환경 구축 및 Dependencies 관리
+--------------------------------------------------------
+Poetry는 Python 프로젝트의 의존성 관리와 가상환경 관리를 자동화해주는 도구입니다.
+
+- 프로젝트 생성 및 초기화:
+    poetry new project_name
+    poetry init
+- 가상환경 활성화:
+    poetry shell
+- 의존성 설치:
+    poetry add fastapi uvicorn
+    poetry add --dev pytest mypy ruff black isort
+
+2. FastAPI 프로젝트 구성 및 서버 실행
+-------------------------------------
+FastAPI는 Python 기반의 비동기 웹 프레임워크입니다.
+
+- 기본 구조:
+    fastapi-app/
+    ├── app/
+    │   ├── main.py
+    └── pyproject.toml
+
+- 코드 예시:
+    from fastapi import FastAPI
+
+    app = FastAPI()
+
+    @app.get("/")
+    def read_root():
+        return {"message": "Hello, FastAPI"}
+
+- 실행:
+    uvicorn app.main:app --reload
+
+3. 코드 포매터: ruff, black, isort
+----------------------------------
+- black: 코드 자동 정렬
+    black .
+- isort: import 정렬
+    isort .
+- ruff: linting 및 자동 수정
+    ruff check .
+    ruff check . --fix
+
+4. mypy: 정적 타입 검사기
+---------------------------
+- 타입 힌트를 활용하여 타입 오류를 사전에 확인합니다.
+- 예시:
+    def add(x: int, y: int) -> int:
+        return x + y
+
+    result = add("1", "2")  # 오류 감지
+
+- 실행:
+    mypy .
+
+5. pytest: 테스트 프레임워크
+------------------------------
+- 단위 및 통합 테스트 도구
+- 예시:
+    from app.main import add
+
+    def test_add():
+        assert add(1, 2) == 3
+
+- 실행:
+    pytest
+- 커버리지 측정:
+    pytest --cov=app
+
+요약
+----
+도구         | 목적
+-------------|-------------------------
+Poetry       | 의존성 및 가상환경 관리
+FastAPI      | 비동기 웹 API 서버 구성
+black/isort  | 코드 스타일 자동화
+ruff         | lint 및 자동 포맷
+mypy         | 타입 안정성 검사
+pytest       | 테스트 코드 실행 및 검증
