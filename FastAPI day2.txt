@@ -1,0 +1,144 @@
+1. Shell Script란 무엇이고, 작성법
+
+✅ 개념:
+Shell Script는 셸(터미널, 콘솔 등)에서 실행되는 명령어들을 모아놓은 파일입니다. 주로 `.sh` 확장자를 사용하며, 반복작업 자동화, 시스템 관리 등에 활용됩니다.
+
+✅ 예시:
+#!/bin/bash
+echo "Hello, World!"
+mkdir test_directory
+cd test_directory
+touch hello.txt
+echo "This is a shell script." > hello.txt
+
+✅ 핵심:
+- `#!/bin/bash`로 시작해야 bash shell로 실행됨
+- `chmod +x script.sh`로 실행 권한 부여
+- 실행은 `./script.sh`로 가능
+
+---
+
+2. GitHub Actions란 무엇이고, 활용법
+
+✅ 개념:
+GitHub Actions는 GitHub에서 제공하는 CI/CD 파이프라인 도구로, 코드 푸시나 PR, 이슈 트리거 등 특정 이벤트에 따라 자동으로 스크립트를 실행할 수 있습니다.
+
+✅ 활용 예:
+- 코드 푸시 시 자동 테스트
+- PR 생성 시 Lint 체크
+- 릴리즈 자동 배포
+
+---
+
+3. GitHub Actions 스크립트 작성법
+
+✅ 예시 (.github/workflows/ci.yml):
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        pytest
+
+✅ 핵심:
+- `on:` 이벤트 종류 (예: push, pull_request)
+- `jobs:`는 실행할 작업 블록
+- `steps:`는 각 단계 명령
+
+---
+
+4. GitHub Actions에서의 Cache 동작방식
+
+✅ 개념:
+actions/cache를 통해 의존성 캐시를 저장하고 다음 실행 시 재사용할 수 있습니다. 빌드 속도 향상과 비용 절감에 유리합니다.
+
+✅ 예시:
+- name: Cache pip dependencies
+  uses: actions/cache@v3
+  with:
+    path: ~/.cache/pip
+    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+    restore-keys: |
+      ${{ runner.os }}-pip-
+
+✅ 이점:
+- 종속성 재설치 시간 단축
+- 자원 절약
+
+---
+
+5. Spec API란?
+
+✅ 개념:
+보통 “Spec API”는 API 명세서, 예를 들어 OpenAPI (Swagger) 같은 API 스펙 문서를 의미합니다. 이는 API의 구조, 요청/응답 형식, 인증 방식 등을 정의한 문서입니다.
+
+✅ 활용 예:
+- 클라이언트와 서버 간 명확한 계약
+- 자동 문서화 (FastAPI에서 자동 생성됨)
+- 테스트 자동화에 활용
+
+✅ FastAPI에서 예:
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/items/{item_id}", summary="Get Item", description="Get a specific item by ID")
+def read_item(item_id: int):
+    return {"item_id": item_id}
+
+---
+
+6. FastAPI로 라우터 구성법
+
+✅ 예시:
+main.py
+from fastapi import FastAPI
+from routers import users
+
+app = FastAPI()
+app.include_router(users.router, prefix="/users")
+
+routers/users.py
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/")
+def get_users():
+    return [{"name": "Alice"}, {"name": "Bob"}]
+
+✅ 핵심:
+- APIRouter()로 모듈화
+- include_router()로 메인 앱에 등록
+- 모듈별로 라우터를 관리 → 유지보수 용이
+
+---
+
+요약
+
+| 항목 | 핵심 개념 |
+|------|-----------|
+| 1. Shell Script | 리눅스 명령어 자동화 스크립트 |
+| 2. GitHub Actions | GitHub 기반 자동화 도구 (CI/CD) |
+| 3. Action Script | .yml로 정의, 이벤트 트리거, Job-단위로 실행 |
+| 4. Cache | 의존성 캐싱으로 빌드 시간 단축 |
+| 5. Spec API | OpenAPI 등 API 명세 자동화 |
+| 6. FastAPI 라우터 | 모듈 분리로 API 구조화 |
