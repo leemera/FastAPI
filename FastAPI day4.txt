@@ -1,0 +1,98 @@
+
+1. DB의 종류와 특징
+
+1) PostgreSQL
+- 오픈소스 객체 관계형 DBMS
+- 고급 쿼리 지원, JSONB, GIS(PostGIS), 트랜잭션 신뢰도 높음
+- 복잡한 데이터 처리 및 정합성 요구 서비스에 적합 (ex. 금융, 데이터 분석)
+
+2) MySQL
+- 가장 널리 쓰이는 오픈소스 관계형 DBMS
+- 속도와 안정성이 뛰어남, MariaDB와 호환
+- CMS, 블로그, 단순 웹 서비스에 적합
+
+3) MongoDB
+- NoSQL 문서 지향 DB, JSON 유사한 BSON 구조
+- 스키마 자유도 높고 수평 확장에 유리
+- 빠른 개발, 비정형 데이터, 로그/IoT 저장 등에 적합
+
+서비스에 따라 적절한 DB 선택:
+- 관계형: 정합성, 트랜잭션 → PostgreSQL, MySQL
+- 비관계형: 유연성, 확장성 → MongoDB 등
+
+
+2. ORM 선택과 활용
+
+1) SQLAlchemy (동기/비동기 지원)
+- 복잡한 관계형 쿼리, 커스텀 모델링 유리
+- Alembic과 연동하여 마이그레이션 가능
+
+2) Tortoise ORM (비동기 특화)
+- Django ORM 스타일, FastAPI와 호환
+- Aerich과 함께 사용하면 편리한 비동기 마이그레이션 가능
+
+선택 기준:
+- 동기: SQLAlchemy + Alembic
+- 비동기: Tortoise ORM + Aerich
+
+
+3. 마이그레이션 도구
+
+1) Alembic (SQLAlchemy 전용)
+- 스키마 버전 관리, 자동 스크립트 생성
+- CLI 명령어로 쉽게 마이그레이션
+
+예시:
+alembic init alembic
+alembic revision --autogenerate -m "add users"
+alembic upgrade head
+
+2) Aerich (Tortoise ORM 전용)
+- 간단한 설정으로 마이그레이션 자동 관리
+
+예시:
+aerich init -t config.TORTOISE_ORM
+aerich migrate
+aerich upgrade
+
+
+4. FastAPI Config 설정으로 DB 연결
+
+예시 config.py:
+import os
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    DB_URL: str = "postgresql+asyncpg://user:pass@localhost/dbname"
+
+settings = Settings()
+
+main.py:
+from tortoise.contrib.fastapi import register_tortoise
+
+register_tortoise(
+    app,
+    db_url=settings.DB_URL,
+    modules={"models": ["app.models"]},
+    generate_schemas=True,
+    add_exception_handlers=True,
+)
+
+
+5. ORM 활용 API 작성
+
+예시 (Tortoise ORM 사용):
+from tortoise.models import Model
+from tortoise import fields
+from fastapi import FastAPI
+
+app = FastAPI()
+
+class User(Model):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50)
+
+@app.post("/users")
+async def create_user(name: str):
+    user = await User.create(name=name)
+    return {"id": user.id, "name": user.name}
