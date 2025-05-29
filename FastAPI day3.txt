@@ -1,0 +1,125 @@
+
+1. SPEC API란 무엇인가?
+
+개념 설명:
+- SPEC API는 OpenAPI (Swagger) 스펙에 기반한 REST API 명세를 의미하며, API의 입력/출력, 엔드포인트, 응답 포맷 등을 표준화하여 문서화합니다.
+
+활용 예시 (YAML 형식):
+paths:
+  /users:
+    get:
+      summary: 사용자 목록 조회
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+활용 방법:
+- API 클라이언트 자동 생성, API 문서 생성, 테스트 자동화 및 Mock 서버 구성 등에 사용됩니다.
+
+
+2. Open API의 Swagger API Docs
+
+개념 설명:
+- Swagger는 OpenAPI 스펙을 UI로 시각화해주는 도구입니다.
+- FastAPI는 /docs, /redoc 경로에서 Swagger UI를 자동 생성합니다.
+
+예시 코드:
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int):
+    return {"item_id": item_id}
+
+활용 방법:
+- 실시간 API 문서 자동 생성 및 테스트
+- 프론트엔드 협업을 위한 명세 공유
+
+
+3. 써드 파티 라이브러리
+
+개념 설명:
+- Python 표준 라이브러리 외부의 라이브러리
+- pip 또는 poetry를 통해 설치
+
+활용 예시:
+- requests, httpx, sqlalchemy, bcrypt, pyjwt 등
+
+활용 방법:
+- 공식 문서를 읽고 필요에 따라 기능 확장에 사용
+- 라이브러리의 유지보수 상태 및 이슈 확인
+
+
+4. 암호화 / 복호화
+
+개념 설명:
+- 암호화는 데이터를 보호하기 위해 인코딩, 복호화는 이를 복원
+- 해시는 일방향 암호화
+
+암호화 방식:
+- 대칭키(AES), 비대칭키(RSA), 해시(SHA256, bcrypt)
+
+예시 코드:
+from cryptography.fernet import Fernet
+
+key = Fernet.generate_key()
+cipher = Fernet(key)
+
+token = cipher.encrypt(b"my-secret")
+print(cipher.decrypt(token))  # b'my-secret'
+
+
+5. Sqids Python 라이브러리
+
+개념 설명:
+- 숫자 ID를 짧고 안전한 문자열로 변환
+- URL-safe 및 추측이 어려움
+
+설치 및 사용:
+from sqids import Sqids
+
+sqids = Sqids()
+encoded = sqids.encode([1, 2, 3])
+print(encoded)           # 예: "86Rf07"
+print(sqids.decode(encoded))  # [1, 2, 3]
+
+활용처:
+- 노출 방지, URL용 짧은 ID 생성 등
+
+
+6. FastAPI 내부 모듈 및 함수 활용하여 SPEC API 라우터 구성
+
+개념 설명:
+- FastAPI는 OpenAPI, Starlette, Pydantic 등을 통합한 고성능 웹 프레임워크
+- Swagger 문서, 경로 매핑, 라우터 분리 기능 제공
+
+예시 코드:
+from fastapi import APIRouter
+from pydantic import BaseModel
+
+router = APIRouter()
+
+class User(BaseModel):
+    id: int
+    name: str
+
+@router.get("/users", response_model=list[User])
+def get_users():
+    return [{"id": 1, "name": "Alice"}]
+
+FastAPI 앱에 포함:
+from fastapi import FastAPI
+from .routers import user_router
+
+app = FastAPI()
+app.include_router(user_router, prefix="/api")
+
+문서 자동화 경로:
+- /docs (Swagger UI), /redoc (Redoc), /openapi.json (스펙)
