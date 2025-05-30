@@ -1,0 +1,62 @@
+
+[DB & Tortoise ORM 활용 요약 정리]
+
+1. Query Plan
+- 개념: SQL 쿼리가 어떻게 실행되는지 DB가 판단한 실행 계획.
+- 주요 도구: EXPLAIN
+- 활용: 느린 쿼리의 원인 분석 (Index 사용 여부, Table Scan 등)
+- 예시: 
+  EXPLAIN SELECT * FROM users WHERE email = 'abc@example.com';
+
+------------------------------------------------
+
+2. Transaction
+- 개념: 여러 쿼리를 묶어 원자성을 보장하는 단위. (ACID 속성 보장)
+- 실패 시 전체 롤백, 성공 시 커밋
+- Tortoise ORM 사용법:
+  from tortoise.transactions import in_transaction
+
+  async with in_transaction() as connection:
+      await User.create(name="Alice", using_db=connection)
+      await Post.create(title="Hello", user_id=1, using_db=connection)
+
+------------------------------------------------
+
+3. select_related vs prefetch_related
+- select_related:
+  * JOIN 사용, ForeignKey & OneToOne 관계에 적합
+  * 쿼리 1번 → 성능 빠름, 메모리 적음
+
+- prefetch_related:
+  * 쿼리 2번 이상, Python 메모리에서 매핑
+  * ManyToMany, reverse FK 관계에 적합
+  * 많은 데이터일수록 select_related보다 유리
+
+- 예시:
+  await User.all().select_related("profile")  # FK
+  await User.all().prefetch_related("posts")  # M2M 또는 reverse FK
+
+------------------------------------------------
+
+4. Database Index
+- 개념: 특정 컬럼에 대한 색인. 검색 속도 향상.
+- 단점: 쓰기/삽입 시 약간의 성능 손실
+- 기본 구조: B-Tree
+- Tortoise ORM 모델 예시:
+  class User(models.Model):
+      email = fields.CharField(max_length=255, unique=True, index=True)
+
+- 실행 계획 확인:
+  EXPLAIN SELECT * FROM user WHERE email = 'abc@example.com';
+
+------------------------------------------------
+
+[요약 비교]
+
+항목             | 핵심 요약
+----------------|-----------------------------
+Query Plan       | 쿼리 실행 계획 확인용. EXPLAIN 사용
+Transaction      | 쿼리 묶음 실행. in_transaction() 사용
+select_related   | JOIN 사용, FK/O2O에 적합, 쿼리 1번
+prefetch_related | 다중 쿼리, M2M/reverse FK에 적합
+Index            | 색인 설정으로 조회 성능 향상, index=True
