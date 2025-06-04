@@ -1,0 +1,63 @@
+1. Database에서 Index란?
+- 정의: 테이블의 특정 컬럼에 대한 검색 속도 향상을 위해 사용하는 자료 구조.
+- 역할: 데이터를 빠르게 찾기 위해 사용되며, 마치 책의 색인(index)처럼 작동.
+- 활용:
+  CREATE INDEX idx_name ON users(name);
+
+2. Query Plan 조회 방법
+- 정의: 쿼리 실행 시 DB가 어떤 방식으로 데이터를 조회할지 계획(plan)을 보여주는 도구.
+- 활용 예 (PostgreSQL 기준):
+  EXPLAIN ANALYZE SELECT * FROM users WHERE id = 1;
+- 이해: Seq Scan, Index Scan, Join 방식 등을 파악하여 성능 튜닝 가능.
+
+3. Semantic Versioning (시맨틱 버전)
+- 형식: MAJOR.MINOR.PATCH
+  - MAJOR: 호환되지 않는 변경
+  - MINOR: 기능 추가 (호환됨)
+  - PATCH: 버그 수정
+- 예: 2.1.4 → 2는 major 버전, 1은 minor, 4는 패치
+
+4. poetry.lock 이해 및 활용
+- 역할: Python 패키지의 정확한 버전 정보를 잠금(lock)하여 재설치 시 동일한 환경을 보장.
+- 활용:
+  poetry install  # lock 파일을 기준으로 설치
+  poetry update   # 최신 버전으로 갱신
+
+5. Async의 필요성과 개념
+- 필요성: I/O 작업(네트워크, 파일 등) 중 블로킹 없이 효율적인 실행을 위함.
+- 기본 구조:
+  async def fetch_data():
+      await asyncio.sleep(1)
+
+6. asyncio의 System Call – select() 동작
+- 설명: asyncio는 OS 수준에서 select() 또는 epoll() 등을 사용하여 비동기적으로 이벤트 감시.
+- 역할: 어떤 소켓/파일이 준비되었는지 감지하고 적절한 콜백 호출.
+
+7. Task, Future, Coroutine, await의 동작
+- Coroutine: async def로 정의된 비동기 함수
+- Future: 비동기 작업의 결과를 담을 객체
+- Task: Coroutine을 실행 가능하게 감싼 Future
+- await: Coroutine을 일시 중단하고, 다른 작업을 실행할 기회 제공
+
+8. Event Loop의 내부 동작
+- 설명: 비동기 작업들을 큐에 등록하고, 실행 가능할 때 순서대로 계속해서 수행하는 루프 구조.
+- 핵심: 이벤트 등록 → 감시 → 실행 → 반복
+
+9. gather() vs as_completed()
+- gather(): 병렬 실행 후 결과를 순서대로 반환
+  await asyncio.gather(task1(), task2())
+
+- as_completed(): 완료되는 순서대로 처리
+  for coro in asyncio.as_completed([task1(), task2()]):
+      result = await coro
+
+10. 단위 테스트 vs API 통합 테스트
+- 단위 테스트:
+  - 장점: 빠르고, 오류를 세밀하게 잡을 수 있음
+  - 단점: 시스템 전체 흐름을 보기는 어려움
+
+- 통합 테스트:
+  - 장점: 실제 사용 시나리오를 검증 가능
+  - 단점: 느리고, 원인 분석이 어려움
+
+👉 상황에 따라 둘을 병행하여 사용하는 것이 좋습니다.
